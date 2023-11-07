@@ -106,8 +106,14 @@ class AmbientLight extends Light {
      * Call Shader.setUniform1f('u_myarray[2]', 3.0)
      */
     update( ) {
-        throw '"AmbientLight.update" not implemented'
+        //throw '"AmbientLight.update" not implemented'
         // TODO: Pass the light properties to the shader
+        this.target_shader.use( )
+        
+        this.target_shader.setUniform3f(`u_lights_ambient[${this.id}].color`, this.color)
+        this.target_shader.setUniform1f(`u_lights_ambient[${this.id}].intensity`, this.intensity)
+
+        this.target_shader.unuse( )
     }
 }
 
@@ -152,8 +158,17 @@ class DirectionalLight extends Light {
      * Use the light's this.model_matrix to find the direction
      */
     update( ) {
-        throw '"DirectionalLight.update" not implemented'
+        //throw '"DirectionalLight.update" not implemented'
         // TODO: Pass the light properties to the shader
+        this.target_shader.use( )
+        
+        this.target_shader.setUniform3f(`u_lights_directional[${this.id}].color`, this.color)
+        this.target_shader.setUniform1f(`u_lights_directional[${this.id}].intensity`, this.intensity)
+
+        let direction = vec3.transformQuat(vec3.create(), [0,1,0], mat4.getRotation(quat4.create(), this.model_matrix)) 
+        this.target_shader.setUniform3f(`u_lights_directional[${this.id}].direction`, direction)
+
+        this.target_shader.unuse( )
     }
 }
 
@@ -198,8 +213,17 @@ class PointLight extends Light {
      * Use this light's this.model_matrix to find its position
      */
     update( ) {
-        throw '"PointLight.update" not implemented'
+        //throw '"PointLight.update" not implemented'
         // TODO: Pass the light properties to the shader
+        this.target_shader.use( )
+        
+        this.target_shader.setUniform3f(`u_lights_point[${this.id}].color`, this.color)
+        this.target_shader.setUniform1f(`u_lights_point[${this.id}].intensity`, this.intensity)
+        
+        let position = mat4.getTranslation(vec3.create(),this.model_matrix)
+        this.target_shader.setUniform3f(`u_lights_point[${this.id}].position`, position)
+
+        this.target_shader.unuse( )
     }
 }
 

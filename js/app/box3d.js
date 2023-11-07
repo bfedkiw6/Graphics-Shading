@@ -46,6 +46,24 @@ class Box extends Object3D {
         super( gl, shader, vertices, indices, gl.LINES )
     }
 
+     /**
+     * Sets up a vertex attribute object that is used during rendering to automatically tell WebGL how to access our buffers
+     * @param { WebGL2RenderingContext } gl The webgl2 rendering context
+     * @param { Shader } shader The shader that will be used to render the light gizmo in the scene
+     */
+    createVAO( gl, shader ) {
+         this.vertex_array_object = gl.createVertexArray();
+        gl.bindVertexArray(this.vertex_array_object);
+        gl.bindBuffer( gl.ARRAY_BUFFER, this.vertices_buffer )
+        gl.enableVertexAttribArray( shader.getAttributeLocation( "a_position" ) )
+    
+        let stride = 0, offset = 0
+        gl.vertexAttribPointer( shader.getAttributeLocation( "a_position" ), this.num_components, gl.FLOAT, false, stride, offset )
+    
+        gl.bindVertexArray( null )
+        gl.bindBuffer( gl.ARRAY_BUFFER, null )
+    }
+
     /**
      * Perform any necessary updates. 
      * Children can override this.

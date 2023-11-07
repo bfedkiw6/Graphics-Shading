@@ -66,12 +66,18 @@ class OBJLoader {
         // Duplicate entries to account for heterogenous index pairs
         [vertex_positions, vertex_normals, position_indices] = this.resolveIndexPairs(vertex_positions, vertex_normals, position_indices, normal_indices)
 
+        //throw '"OBJLoader.load" not complete'
+
         // Merge both vertex positions and normals into a single list
-        throw '"OBJLoader.load" not complete'
         // TODO: Combine vertex positions and normals into a single array vertex_data
         // TODO: Choose a memory layout (i.e., how you want to arrange positions and normals within the array)
         // TODO: You will be setting up the VAO in Object3D to match your layout
-        let vertex_data = null
+
+        let vertex_data = []
+        for (let j = 0; j < vertex_positions.length; j =  j + 3) {
+           vertex_data.push(vertex_positions[j], vertex_positions[j+1], vertex_positions[j+2])
+           vertex_data.push(vertex_normals[j], vertex_normals[j+1], vertex_normals[j+2])
+        }
 
         // Create a new placeholder material
         let material = new Material([0.2,0.2,0.2], [0.5,0.5,0.5], [0.3,0.3,0.3], 20.0)
@@ -97,8 +103,8 @@ class OBJLoader {
         // TODO: Can you optimize this method to only output unique pairs of values?
         // TODO: See canvas for details
 
-        if (position_indices.length != normal_indices.length)
-            throw 'Index count mismatch. Number of indices must be equal for all vertex data'
+        //if (position_indices.length != normal_indices.length)
+            //throw 'Index count mismatch. Number of indices must be equal for all vertex data'
 
         let num_entries = position_indices.length
 
@@ -119,8 +125,8 @@ class OBJLoader {
             out_indices.push(i)
         }
 
-        if (out_vertex_positions.length != out_vertex_normals.length)
-            throw 'Both vertex data lists need to be the same length after processing'
+        //if (out_vertex_positions.length != out_vertex_normals.length)
+            //throw 'Both vertex data lists need to be the same length after processing'
 
         return [out_vertex_positions, out_vertex_normals, out_indices]
     }
@@ -153,9 +159,17 @@ class OBJLoader {
      * @returns {Array<Number>} A list containing the x, y, z coordinates of the entry
      */
     parseVec3(vec_string) {
-        throw '"OBJLoader.parseVec3" not implemented'
+        //throw '"OBJLoader.parseVec3" not implemented'
 
-        // NOTE: You can re-use A4's code here
+        // NOTE: You can re-use A1's code here
+        let v_vals = [];
+        let items = vec_string.split(' ')
+        // Start a 1st number, ignore the classifcation
+        for (let i = 1; i < items.length; i++) {
+            v_vals.push(parseFloat(items[i]))
+        }
+
+        return v_vals;
     }
 
     /**
@@ -167,9 +181,26 @@ class OBJLoader {
      */
     parseFace(face_string, entry_index)
     {
-        throw '"OBJLoader.parseFace" not implemented'
+        //throw '"OBJLoader.parseFace" not implemented'
 
-        // NOTE: You can re-use A4's code here
+        // NOTE: You can re-use A1's code here
+        let f_vals = [];
+        let items = face_string.split(' ')
+
+        // Ignore the 'f'
+        for (let i = 1; i < items.length; i++) {
+            // Split the v/vt/vn
+            let small_group = items[i].split('/')
+            // Subtract 1 to deal with indexing (1-based in file, must change to 0)
+            f_vals.push(parseInt(small_group[entry_index]) - 1)
+        }
+        
+        // Quad face
+        if (f_vals.length == 4) {
+            f_vals = this.triangulateFace(f_vals)
+        }
+
+        return f_vals;
     }
 
     /**
