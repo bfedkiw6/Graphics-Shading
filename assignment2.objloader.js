@@ -103,8 +103,8 @@ class OBJLoader {
         // TODO: Can you optimize this method to only output unique pairs of values?
         // TODO: See canvas for details
 
-        //if (position_indices.length != normal_indices.length)
-            //throw 'Index count mismatch. Number of indices must be equal for all vertex data'
+        if (position_indices.length != normal_indices.length)
+            throw 'Index count mismatch. Number of indices must be equal for all vertex data'
 
         let num_entries = position_indices.length
 
@@ -113,20 +113,42 @@ class OBJLoader {
 
         let out_indices = []
 
+        let map = {}
+        let current_index = 0
+
         for (let i = 0; i < num_entries; i++) {
             let position_idx = position_indices[i] * 3
             let normal_idx = normal_indices[i] * 3
 
-            for (let j = 0; j < 3; j++) {
-                out_vertex_positions.push(vertex_positions[position_idx + j])
-                out_vertex_normals.push(vertex_normals[normal_idx + j])
+            let string_v = "";
+            let string_vn = "";
+            for (let k = 0; k < 3; k++) {
+                string_v = string_v.concat(" ", vertex_positions[position_idx + k].toString())
+                string_vn = string_vn.concat(" ", vertex_normals[normal_idx + k].toString())
             }
+            let string_v_vn = string_v.concat(" ", string_vn)
 
-            out_indices.push(i)
+            if (string_v_vn in map) {
+
+                out_indices.push(map[string_v_vn])
+            } else {
+                for (let j = 0; j < 3; j++) {
+                    out_vertex_positions.push(vertex_positions[position_idx + j])
+                    out_vertex_normals.push(vertex_normals[normal_idx + j])
+                }
+
+                map[string_v_vn] = current_index
+                out_indices.push(current_index)
+                current_index = current_index + 1
+            }       
         }
 
-        //if (out_vertex_positions.length != out_vertex_normals.length)
-            //throw 'Both vertex data lists need to be the same length after processing'
+        if (out_vertex_positions.length != out_vertex_normals.length)
+            throw 'Both vertex data lists need to be the same length after processing'
+
+        console.log(out_vertex_positions.length/3)
+        console.log(num_entries)
+        console.log(out_indices.length)
 
         return [out_vertex_positions, out_vertex_normals, out_indices]
     }
